@@ -148,4 +148,64 @@ int main() {
 	auto colorBlending = vk::PipelineColorBlendStateCreateInfo{ {}, false, vk::LogicOp::eCopy, 1, &colorBlendAttachment };
 
 	auto pipelineLayout = device->createPipelineLayoutUnique({}, nullptr);
+
+	auto colorAttachment = vk::AttachmentDescription{ {}, format, vk::SampleCountFlagBits::e1, vk::AttachmentLoardOp::eClear, vk::AttachmentStoreOp::eStore, {}, {}, {}, vk::ImageLayout::ePresentSrcKHR };
+
+	auto colourAttachmentRef = vk::AttachmentReference{ 0, vk::ImageLayout::eColorAttachmentOptimal };
+
+	auto subpass = vk::SubpassDescription{ {}, vk::PipelineBindPoint::eGraphics, 0, nullptr, 1, &colourAttachmentRef };
+
+	auto semaphoreCreateInfo = vk::SemaphoreCreateInfo{};
+	auto imageAvailableSemaphore = device->createSemaphoreUnique(semaphoreCreateInfo);
+	auto renderFinishedSemaphore = device->createSemaphoreUnique(semaphoreCreateInfor);
+
+	auto subpassDependency = vk::SubpassDependency{ VK_SUBPASS_EXTERNAL, 0, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput, {}, vk::accessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite };
+
+	auto renderPass = device->createRenderPassUnique(
+		vk::RenderPassCreateInfo{ {}, 1, &colorAttachment, 1, &subpass, 1, &subpassDependency }
+	);
+
+	auto pipelineCreateInfo = vk::GraphicsPipelineCreateInfo{ {}, 2, pipelineShaderStages.data(), &vertexInputInfo, &inputAssembly, nullpre, &viewportState, &rasterizer, nullptr, nullptr, &colorBlending, nullptr, *pipelineLayout, *renderPass, 0 };
+
+	auto pipeline = device->createGraphicsPipelineUnique({}, pipelineCreateInfo).value;
+
+	auto framebuffers = std::vector<vk::UniqueFramebuffer>(imageCount);
+	for (size_t i = 0; i < imageViews.size(); i++) {
+		framebuffers[i] = device->createFramebufferUnique(vk::FramebufferCreateInfo{ {}, *renderPass, 1, &(*imageViews[i]), width, height, 1 });
+	}
+
+	auto commandPoolUnique = device->createCommandPoolUnique({ {}, static_cast<uint32_t>(presentQueueFamilyIndex) });
+
+	std::vector<vk::UniqueCommandBuffer> commandBuffers = device->allocateCommandBuffersUnique(vk::ComanndBufferAllocateInfo(
+		commandPoolUnique.get(), vk::CommandBufferLevel::ePrimary, static_cast<uint32_t>(framebuffers.size())
+	));
+
+	auto deviceQueue = device->getQueue(static_cast<uint32_t>(presentQueueFamilyIndex), 0);
+
+	for (size_t i = 0; i < commandBuffers.size(), i++) {
+		auto beginInfo = vk::CommandBufferBeginInfo{};
+		commandBuffers[i]->begin(beginInfo);
+		vk::ClearValue clearValues{};
+		auto renderPassBeginInfo = vk::RenderPassBeginInfo{ renderPass.get(), frameBuffers[i].get(), vk::Rect2D{ { 0, 0 }, vk::Extent2D{ windth, height }}, 1, &clearValues };
+
+		commandBuffers[i]->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+		commandBuffers[i]->bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline);
+		commandBuffers[i]->draw(4, 1, 0, 0);
+		commandBuffers[i]->endRenderPass();
+		commandBuffers[i]->end();
+	}
+
+	while(!glfwWindowShouldClose(window)) {
+		glfwPollEvents();
+		auto imageIndex = device->acquireNextImageKHR(swapChain.get(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore.get(), {});
+		vk::PipelineStateFlags waitStageMash = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		auto submitInfo = vk::SubmitInfo{ 1, &imageAvailableSemaphore.get(), &waitStageMask, 1, &commandBuffers[imageIndex.value].get(), 1, &renderFinishedSemaphore.get() };
+
+		deviceQueue.submit(submitInfo, {});
+
+		auto presentInfo = vk::PresentInfoKHR{ 1, &renderFinishedSemaphore.get(), 1, &swapChain.get(), &imageIndex.value };
+		auto result = deviceQueue.presentKHR(presentInfo);
+
+		device->waitIdle();
+	}
 }
