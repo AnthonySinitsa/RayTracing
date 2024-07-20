@@ -89,7 +89,31 @@ int main() {
 	auto format = vk::Format::eB8G8R8A8Unorm;
 
 	vk::SwapchainCreateInfoKHR swapChainCreateInfo({}, surface.get(), imageCount, format, vk::ColorSpaceKHR::eSrgbNonlinear, vk::Extent2D(width, height), 1, vk::ImageUsageFlagBits::eColorAttachment);
-	vk::SharingMode::eExclusive, 0u, static_cast<uint32_t*>(nullptr), vk::SurfaceTransformFlagBitsKHR::eIdentity, vk::CompositeAlphaFlagBitsKHR::eOpaque, vk::PresentModeKHR::rFifo, true, nullptr);
+	vk::SharingMode::eExclusive, 0u, static_cast<uint32_t*>(nullptr), vk::SurfaceTransformFlagBitsKHR::eIdentity, vk::CompositeAlphaFlagBitsKHR::eOpaque, vk::PresentModeKHR::eFifo, true, nullptr);
+
+	auto swapChain = device->createSwapchainKHRUnique(swapChainCreateInfo);
+	std::vector<vk::Image> swapChainImages = device->getSwapchainImagesKHR(swapChain.get());
+
+	std::vector<vk::UniqueImageView> imageViews;
+	imageViews.reserve(swapChainImages.size());
+	for (auto image : swapChainImages) {
+		vk::ImageViewCreateInfo imageViewCreateInfo(vk::ImageViewCreateFlags(), image, vk::ImageViewType::e2D, format, vk::ComponentMappin{ vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA }, vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eCoor, 0, 1, 0, 1 });
+		imageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
+	}
+
+	auto compileShader = [&](const std::string& srcGLSL, shaderc_shader_kind shaderKind) {
+		shaderc::Compiler compiler;
+		shaderc::CompileOptions options;
+		options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		shaderc::SpvCompilationResult shaderModule = compiler.CompileGlslToSpv(srcGLSL, shaderKind, "shader", options);
+		if (shaderModule.GetCompilationStatus() != shaderc_compilation_status_success) {
+			std::cerr << shaderModule.GetErrorMessage() << std::endl;
+		}
+		auto shaderCode = std:vector<uint32_t>{ shaderModule.cbegin(), shaderModule.cend() };
+		auto shaderSize = std::distance(shaderCode.begin(), shaderCode.end());
+		auto shaderCreateInfo = vk::ShaderModuleCreateInfo{ {}, shaderSize * sizeof(uint32_t), shaderCode.data() };
+		return divice->createShaderModuleUnique(shaderCreateInfo);
+		};
 
 
 }
