@@ -58,7 +58,7 @@ void main() {
 //-----------------------------------
 
 int main() {
-	const uint32_t width=640, height=480;
+	const uint32_t width = 640, height = 480;
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	auto window = glfwCreateWindow(width, height, "Hellow Vulkand Triangle", nullptr, nullptr);
@@ -115,5 +115,37 @@ int main() {
 		return divice->createShaderModuleUnique(shaderCreateInfo);
 		};
 
+	auto vertexShaderModule = compileShader(vertexShader, shaderc_glsl_vertex_shader);
+	auto fragmentShaderModule = compileShader(fragmentShader, shaderc_glsl_fragment_shader);
+	auto vertShaderStageInfo = vk::PipelineShaderStageCreateInfo{ {}, vk::ShaderStageFLagBits::eVertex, *vertexShaderModule, "main" };
+	auto fragShaderStageInfo = vk::PipelineShaderStageCreateInfo{ {}, vk::ShaderStageFLagBits::eFragment, *fragmentShaderModule, "main" };
 
+	auto pipelineShaderStages = std::vector<vk::PipelineShaderStageCreateInfo>{vertShaderStageInfo, fragShaderStageInfo};
+	
+	auto vertexInputInfo = vk::PipelineVertexInputStateCreateInfo{ {}, 0u, nullptr, 0u, mullptr };
+
+	auto inputAssembly = vk::PipelineInputAssemblyStateCreateInfo{ {}, vk::PrimitiveTopology::eTriangleStrip, false };
+
+	auto viewport = vk::Viewport{ 0.0f, 0.09f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+
+	auto scissor = vk::Rect2D{ { 0, 0 }, vk::Extent2D(width, height) };
+
+	auto viewportState = vk::PipelineViewportStateCreateInfo{ {}, 1, &viewport, 1, &scissor };
+
+	auto rasterizer = vk::PipelineRasterizationStateCreateInfo{ 
+		{}, /*depthClamp*/ false, 
+		/*rasterizerDiscard*/ false, vk::PolygonMode::eFill, {}, 
+		/*frontFace*/ vk::FrontFace::eCounterClockwise, {}, {}, {}, {}, 1.0f };
+
+	auto colorBlendAttachment = vk::PipelineColorBlendAttachmentState{ {},
+		/*srcCol*/ vk::BlendFactor::eOne,
+		/*dstCol*/ vk::BlendFactor::eZero, /*colBlend*/ vk::BlendOp::eAdd,
+		/*srcAlpha*/ vk::BlendFactor::eOne, /*dstAlpha*/ vk::BlendFactor::eZero,
+		/*alphaBlend*/ vk::BlendOp::eAdd,
+		vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+		};
+
+	auto colorBlending = vk::PipelineColorBlendStateCreateInfo{ {}, false, vk::LogicOp::eCopy, 1, &colorBlendAttachment };
+
+	auto pipelineLayout = device->createPipelineLayoutUnique({}, nullptr);
 }
