@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #pragma comment(lib, "glfw3.lib")
