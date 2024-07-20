@@ -50,31 +50,44 @@ std::string fragmentShader = R"fragmentShader(
 #extension GL_ARB_seperate_shader_objects : enable
 layout(location = 0) in vec2 fragUV;
 layout(location = 0) out vec4 outColor;
+
+// Function to compute the signed distance from a point to a cube
+float sdfCube(vec3 p, vec3 size) {
+    vec3 d = abs(p) - size;
+    return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);
+}
+
 void main() {
-	vec2 uv = (fragUV * 2.0) - 1.0;
+    vec2 uv = (fragUV * 2.0) - 1.0;
 
-	// normalize and adjust for ratio
-	uv *= .8;
+    // Normalize and adjust for ratio
+    uv *= .8;
 
-	// initialize some colors
-	vec4 color1 = vec4(.4, .6, .7, 1.0);
-	vec4 color2 = vec4(.9, .7, .6, 1.0);
+    // Convert 2D UV to 3D position
+    vec3 p = vec3(uv, 0.0);
 
-	// shade with 2 faux lights
-	color1 *= .8 - distance(uv, vec2(-.1, -.1));
-	color2 *= .6 - distance(uv, vec2(.25, .3));
-	vec4 sphere = color1 + color2;
+    // Define cube size
+    vec3 cubeSize = vec3(0.5, 0.5, 0.5);
 
-	// limit edges to circle shape
-	float d = distance(uv, vec2(0.0));
-	// smooth edges
-	float t = 1.0 - smoothstep(.6, .61, d);
-	// apply shape to color
-	sphere *= t + 0.2 * uv.y;
+    // Compute the distance from the point to the cube
+    float d = sdfCube(p, cubeSize);
 
-	// output final color and brighten
-	vec4 fragColor = sphere * 1.6;
-	outColor = vec4(fragColor.xyz, 1.0);
+    // Determine color based on distance
+    vec4 color1 = vec4(.4, .6, .7, 1.0);
+    vec4 color2 = vec4(.9, .7, .6, 1.0);
+
+    // Light shading
+    float light = max(0.0, 1.0 - d * 0.5);
+
+    // Combine colors based on distance
+    vec4 sphere = mix(color1, color2, light);
+
+    // Limit edges to cube shape
+    float edge = smoothstep(0.01, 0.02, d);
+    vec4 fragColor = sphere * edge;
+
+    // Output final color and brighten
+    outColor = vec4(fragColor.xyz, 1.0);
 }
 )fragmentShader";
 
@@ -82,7 +95,7 @@ void main() {
 //-----------------------------------
 
 int main() {
-	const uint32_t width = 640, height = 480;
+	const uint32_t width = 940, height = 780;
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	auto window = glfwCreateWindow(width, height, "Hello Vulkan Triangle", nullptr, nullptr);
