@@ -62,7 +62,7 @@ int main() {
 	const uint32_t width = 640, height = 480;
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	auto window = glfwCreateWindow(width, height, "Hellow Vulkand Triangle", nullptr, nullptr);
+	auto window = glfwCreateWindow(width, height, "Hello Vulkan Triangle", nullptr, nullptr);
 	vk::ApplicationInfo appInfo("Hello Vulkan Triangle", 0, nullptr, 0, VK_API_VERSION_1_3);
 
 	auto glfwExtensionCount = 0u;
