@@ -1,69 +1,95 @@
-#include <windows.h>
-#include <vulkan/vulkan.h>
-#include <stdio.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#pragma comment(lib, "glfw3.lib")
+#include <iostream>
 
+#include <vulkan/vulkan.hpp>
 #pragma comment(lib, "vulkan-1.lib")
 
-// helper function/debug log function
-// just in case window environment closes before we see error
-// could also redirect error to a file
-int dprintf(const char* format, ...) {
-	static char s_printf_buf[1024];
-	va_list args;
-	va_start(args, format);
-	_vsnprintf_s(s_printf_buf, sizeof(s_printf_buf), format, args);
-	va_end(args);
-	OutputDebugStringA(s_printf_buf);
-	return 0;
+// inline shader
+#include <shaderc/shaderc.hpp>
+#pragma comment(lib, "shaderc.lib")
+#pragma comment(lib, "shaderc_utild.lib.lib")
+#pragma comment(lib, "shaderc_combinedd.lib")
+
+//-----------------------------------
+//-----------------------------------
+
+std:string vertexShader = R"vertexshader(
+
+#version 450
+#extension GL_ARB_seperate_shader_objects : enable
+out gl_PerVertex {
+	vec4 gl_Position;
+};
+layout(location = 0) out vec2 fragUV;
+vec2 positions[4] = vec2[](
+vec2(-1.0, 1.0),
+vec2(-1.0, -1.0),
+vec2(1.0, 1.0),
+vec2(1.0, -1.0)
+);
+
+vec2 uvs[4] = vec2[](
+vec2(1.0, 1.0),
+vec2(1.0, -1.0),
+vec2(-1.0, 1.0),
+vec2(-1.0, -1.0)
+);
+
+void main() {
+	gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+	fragUV = uvs[gl_VertexIndex] * 0.5 + 0.5; // 0->1
 }
+)vertexshader";
+
+std:string fragmentShader = R"fragmentShader(
+
+#version 450
+#extension GL_ARB_seperate_shader_objects : enable
+layout(location = 0) in vec2 fragUV;
+layout(location = 0) out vec4 outColor;
+void main() {
+	outColor = vec4(fragUV, 1.0, 1.0);
+}
+)fragmentShader";
+
+//-----------------------------------
+//-----------------------------------
 
 int main() {
-	VkApplicationInfo applicationInfo;
-	VkInstanceCreateInfo instanceInfo;
-	VkInstance instance;
+	const uint32_t width=640, height=480;
+	glfwInit();
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	auto window = glfwCreateWindow(width, height, "Hellow Vulkand Triangle", nullptr, nullptr);
+	vk::ApplicationInfo appInfo("Hello Vulkan Triangle", 0, nullptr, 0, VK_API_VERSION_1_3);
 
-	// Filling out application desc.
-	// sType is mandatory
-	applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	// pNext is mandatory
-	applicationInfo.pNext = NULL;
-	// application name
-	applicationInfo.pApplicationName = "Hello World";
-	// engine name
-	applicationInfo.pEngineName = NULL;
-	// engine version
-	applicationInfo.engineVersion = 1;
-	// version of vulkane
-	applicationInfo.apiVersion = VK_MAKE_API_VERSION(0, 1, 3, 0);
+	auto glfwExtensionCount = 0u;
+	auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+	std::vector<const char*> glfwExtensionsVector(glfwExtensions, glfwExtensions + glfwExtensionCount);
+	const vk::ApplicationInfo applicationInfo("Hello World", 0, nullptr, 0, VK_API_VERSION_1_3);
+	const auto instance = vk::createInstanceUnique(vk::InsatnceCreateInfo({}, &applicationInfo, 0, nullptr, static_cast<uint32_t>(glfwExtensionsVector.size()), glfwExtensionsVector.data()));
 
-	// Filling out instance info
-	// sType is mandatory
-	instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	// pNext is mandatory
-	instanceInfo.pNext = NULL;
-	// flags is mandatory
-	instanceInfo.flags = 0;
-	// application infor structure is then passed through instance
-	instanceInfo.pApplicationInfo = &applicationInfo;
-	// don't enable and layer
-	instanceInfo.enabledLayerCount = 0;
-	instanceInfo.ppEnabledLayerNames = NULL;
-	// don't enable extensions
-	instanceInfo.enabledExtensionCount = 0;
-	instanceInfo.ppEnabledExtensionNames = NULL;
+	VkSurfaceKHR surfaceTmp;
+	VkResult err = glfwCreateWindowSurface(*instance, window, nullptr, &surfaceTmp);
+	vk::UniqueSurfaceKHR surface(surfaceTmp, *instance);
 
-	// Now create vulkane instance
-	VkResult result = vkCreateInstance(&instanceInfo, NULL, &instance);
-	if (result != VK_SUCCESS) {
-		dprintf("Failed to create vulkane instance. Error number:%d", result);
-		return 0; // can't continue
-	}
+	size_t presentQueueFamilyIndex = 0u;
+	float queuePriority = 0.0f;
+	auto queueCreateInfos = vk::DeviceQueueCreateInfo{ vk::DeviceQueueCreateFlags(), static_cast<uint32_t>(0), 1, &queuePriority };
 
-	dprintf("Vulkan is ready!.");
+	const auto physicalDevice = instance->enumeratePhysicalDevices()[0];
 
-	// code using Vulkan HERE
+	const std : vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	vk::UniqueDevice device = physicalDevice.createDeviceUnique(vk::DeviceCreateInfo(
+		vk::DeviceCreateFlags(), 1, &queueCreateInfos, 0u, nullptr, static_cast<uint32_t>(deviceExtensions.size()), deviceExtensions.data()
+	));
 
-	// cleanup and goodbye
-	vkDestroyInstance(instance, NULL);
+	uint32_t imageCount = 2;
+	auto format = vk::Format::eB8G8R8A8Unorm;
+
+	vk::SwapchainCreateInfoKHR swapChainCreateInfo({}, surface.get(), imageCount, format, vk::ColorSpaceKHR::eSrgbNonlinear, vk::Extent2D(width, height), 1, vk::ImageUsageFlagBits::eColorAttachment);
+	vk::SharingMode::eExclusive, 0u, static_cast<uint32_t*>(nullptr), vk::SurfaceTransformFlagBitsKHR::eIdentity, vk::CompositeAlphaFlagBitsKHR::eOpaque, vk::PresentModeKHR::rFifo, true, nullptr);
+
 
 }
