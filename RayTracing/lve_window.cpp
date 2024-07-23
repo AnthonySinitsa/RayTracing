@@ -27,4 +27,5 @@ namespace lve {
 			throw std::runtime_error("Failed to create window surface");
 		}
 	}
+
 }

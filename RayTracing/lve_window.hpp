@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
+
 namespace lve {
 	
 	class LveWindow {
@@ -13,10 +14,9 @@ namespace lve {
 		~LveWindow();
 
 		LveWindow(const LveWindow&) = delete;
-		LveWindow *operator = (const LveWindow&) = delete;
+		LveWindow *operator=(const LveWindow&) = delete;
 
 		bool shouldClose() { return glfwWindowShouldClose(window); }
-
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
 	private:
@@ -25,7 +25,6 @@ namespace lve {
 
 		const int width;
 		const int height;
-
 		std::string windowName;
 		GLFWwindow* window;
 	};
