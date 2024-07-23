@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lve_window.hpp"
+#include "lve_pipeline.hpp"
 
 namespace lve {
 
@@ -10,7 +11,9 @@ namespace lve {
 		static constexpr int HEIGHT = 600;
 
 		void run();
+
 	private:
 		LveWindow lveWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
+		LvePipeline lvePipeline{"simple_shader.vert.spv", "simple_shader.frag.spv"};
 	};
 }
