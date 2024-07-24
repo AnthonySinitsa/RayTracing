@@ -5,6 +5,14 @@
 
 namespace lve {
 
+	FirstApp::FirstApp() {
+		createPipelineLayout();
+		createPipeline();
+		createCommandBuffers();
+	}
+
+	FirstApp::~FirstApp() { vkDestroyPipelineLayout(lveDevice.device(), pipelineLayout, nullptr); }
+
 	void FirstApp::run() {
 		while (!lveWindow.shouldClose()) {
 			glfwPollEvents();
@@ -28,5 +36,14 @@ namespace lve {
 		auto pipelineConfig =
 			LvePipeline::defaultPipelineConfigInfo(lveSwapChain.width(), lveSwapChain.height());
 		pipelineConfig.renderPass = lveSwapChain.getRenderPass();
+		pipelineConfig.pipelineLayout = pipelineLayout;
+		lvePipeline = std::make_unique<LvePipeline>(
+			lveDevice,
+			"simple_shader.vert.spv",
+			"simple_shader.frag.spv",
+			pipelineConfig);
 	}
+
+	void FirstApp::createCommandBuffers() {}
+	void FirstApp::drawFrame() {}
 }
