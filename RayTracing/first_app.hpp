@@ -1,8 +1,9 @@
 #pragma once
 
-#include "lve_window.hpp"
-#include "lve_pipeline.hpp"
 #include "lve_device.hpp"
+#include "lve_pipeline.hpp"
+#include "lve_window.hpp"
+#include "lve_swap_chain.hpp"
 
 namespace lve {
 
@@ -16,6 +17,7 @@ namespace lve {
 	private:
 		LveWindow lveWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		LveDevice lveDevice{lveWindow};
+		LveSwapChain lveSwapChain{ lveDevice, lveWindow.getExtent() };
 		LvePipeline lvePipeline{
 			lveDevice,
 			"simple_shader.vert.spv",

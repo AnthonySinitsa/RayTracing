@@ -381,6 +381,7 @@ namespace lve {
             }
         }
 
+        // uncomment to use VSync, and comment out top code above me
         // for (const auto &availablePresentMode : availablePresentModes) {
         //   if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
         //     std::cout << "Present mode: Immediate" << std::endl;
