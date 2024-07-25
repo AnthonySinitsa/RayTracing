@@ -44,6 +44,8 @@ namespace lve {
 		const std::string& fragFilePath,
 		const PipelineConfigInfo& configInfo) {
 
+		std::cout << "Creating Graphics Pipeline..." << std::endl;
+
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE &&
 			"Cannot create grahpics pipeline:: no pipelineLayout provided in configInfo");
 		assert(configInfo.renderPass != VK_NULL_HANDLE &&
@@ -114,6 +116,8 @@ namespace lve {
 			&graphicsPipeline) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create graphics pipeline");
 		}
+
+		std::cout << "Graphics Pipeline created successfully" << std::endl;
 	}
 
 	void LvePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
