@@ -9,7 +9,7 @@ namespace lve {
 	FirstApp::FirstApp() {
 		loadModels();
 		createPipelineLayout();
-		createPipeline();
+		recreateSwapChain();
 		createCommandBuffers();
 	}
 
@@ -55,6 +55,18 @@ namespace lve {
 			"simple_shader.vert.spv",
 			"simple_shader.frag.spv",
 			pipelineConfig);
+	}
+
+	void FirstApp::recreateSwapChain() {
+		auto extent = lveWindow.getExtent();
+		while (extend.width = 0 || extent.height == 0) {
+			extent = lveWindow.getExtent();
+			glfwWaitEvents();
+		}
+
+		vkDeviceWaitIdle(lveDevice.device());
+		lveSwapChain = std::make_unique<LveSwapChain>(lveDevice, extent);
+		createPipeline();
 	}
 
 	void FirstApp::createCommandBuffers() {
