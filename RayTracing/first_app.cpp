@@ -122,11 +122,23 @@ namespace lve {
 		uint32_t imageIndex;
 		auto result = lveSwapChain->acquireNextImage(&imageIndex);
 
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+			recreateSwapChain();
+			return;
+		}
+
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
 
+		recordCommandBuffer(imageIndex);
 		result = lveSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || lveWindow.wasWindowResized()) {
+			lveWindow.resetWindowResizedFlag();
+			recreateSwapChain();
+			return;
+		}
+
 		if (result != VK_SUCCESS) {
 			throw std::runtime_error("Failed to present swap chain image!");
 		}
