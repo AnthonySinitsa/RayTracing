@@ -36,7 +36,7 @@ namespace lve {
 
 		LveWindow lveWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		LveDevice lveDevice{lveWindow};
-		std::unique_ptr<lveSwapChain> lveSwapChain;
+		std::unique_ptr<LveSwapChain> lveSwapChain;
 		std::unique_ptr<LvePipeline> lvePipeline;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;

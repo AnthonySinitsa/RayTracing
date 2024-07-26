@@ -59,7 +59,7 @@ namespace lve {
 
 	void FirstApp::recreateSwapChain() {
 		auto extent = lveWindow.getExtent();
-		while (extend.width = 0 || extent.height == 0) {
+		while (extent.width = 0 || extent.height == 0) {
 			extent = lveWindow.getExtent();
 			glfwWaitEvents();
 		}
