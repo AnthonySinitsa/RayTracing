@@ -81,33 +81,7 @@ namespace lve {
 	void LveRenderer::recordCommandBuffer(int imageIndex) {
 		
 
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = lveSwapChain->getRenderPass();
-		renderPassInfo.framebuffer = lveSwapChain->getFrameBuffer(imageIndex);
-
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = lveSwapChain->getSwapChainExtent();
-
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
-
-		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(lveSwapChain->getSwapChainExtent().width);
-		viewport.height = static_cast<float>(lveSwapChain->getSwapChainExtent().height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		VkRect2D scissor{ {0, 0}, lveSwapChain->getSwapChainExtent() };
-		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
-		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+		
 
 		renderGameObjects(commandBuffers[imageIndex]);
 
@@ -168,6 +142,37 @@ namespace lve {
 		isFrameStarted = false;
 	}
 
-	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+		assert(isFrameStarted && "Can't call beginSwapChainRenderPass if frame is not in progress.");
+		assert(commandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame.");
+
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = lveSwapChain->getRenderPass();
+		renderPassInfo.framebuffer = lveSwapChain->getFrameBuffer(currentImageIndex);
+
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = lveSwapChain->getSwapChainExtent();
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		vkCmdBeginRenderPass(commandBuffer &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(lveSwapChain->getSwapChainExtent().width);
+		viewport.height = static_cast<float>(lveSwapChain->getSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		VkRect2D scissor{ {0, 0}, lveSwapChain->getSwapChainExtent() };
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	}
 	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 }
