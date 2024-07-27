@@ -79,12 +79,7 @@ namespace lve {
 	}
 
 	void LveRenderer::recordCommandBuffer(int imageIndex) {
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to begin recording command buffer!");
-		}
+		
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -123,17 +118,7 @@ namespace lve {
 	}
 
 	void LveRenderer::drawFrame() {
-		uint32_t imageIndex;
-		auto result = lveSwapChain->acquireNextImage(&imageIndex);
-
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			recreateSwapChain();
-			return;
-		}
-
-		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-			throw std::runtime_error("Failed to acquire swap chain image!");
-		}
+		
 
 		recordCommandBuffer(imageIndex);
 		result = lveSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
@@ -148,7 +133,33 @@ namespace lve {
 		}
 	}
 
-	VkCommandBuffer LveRenderer::beginFrame();
+	VkCommandBuffer LveRenderer::beginFrame() {
+		assert(!isFrameStarted && "Can't call beginFrame while already in progress.");
+
+		auto result = lveSwapChain->acquireNextImage(&currentImageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+			recreateSwapChain();
+			return nullptr;
+		}
+
+		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+			throw std::runtime_error("Failed to acquire swap chain image!");
+		}
+
+		isFrameStarted = true;
+
+		auto commandBuffer = getCurrentCommandBuffer();
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to begin recording command buffer!");
+		}
+
+		return commandBuffer;
+	}
 	void LveRenderer::endFrame();
 	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer);
