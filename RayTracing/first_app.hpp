@@ -3,8 +3,8 @@
 #include "lve_device.hpp"
 #include "lve_game_object.hpp"
 #include "lve_pipeline.hpp"
-#include "lve_window.hpp"
 #include "lve_renderer.hpp"
+#include "lve_window.hpp"
 
 // std
 #include <memory>
