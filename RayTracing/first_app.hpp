@@ -2,6 +2,7 @@
 
 #include "lve_device.hpp"
 #include "lve_game_object.hpp"
+#include "lve_pipeline.hpp"
 #include "lve_swap_chain.hpp"
 #include "lve_window.hpp"
 #include "lve_model.hpp"
@@ -34,7 +35,7 @@ namespace lve {
 		void drawFrame();
 		void recreateSwapChain();
 		void recordCommandBuffer(int imageIndex);
-		void renderGameObject(VkCommandBuffer commandBuffer);
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		LveWindow lveWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		LveDevice lveDevice{lveWindow};

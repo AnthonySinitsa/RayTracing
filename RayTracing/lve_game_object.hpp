@@ -27,7 +27,7 @@ namespace lve {
 		LveGameObject& operator=(LveGameObject&&) = default;
 
 		// instead of const, might need to be id_t
-		const getId() { return id; }
+		id_t getId() { return id; }
 
 		std::shared_ptr<LveModel> model{};
 		glm::vec3 color{};

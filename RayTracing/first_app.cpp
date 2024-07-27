@@ -184,7 +184,7 @@ namespace lve {
 			push.transform = obj.transform2d.mat2();
 
 			vkCmdPushConstants(
-				commandBuffers,
+				commandBuffer,
 				pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
