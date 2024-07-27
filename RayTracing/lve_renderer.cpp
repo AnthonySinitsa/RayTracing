@@ -78,24 +78,6 @@ namespace lve {
 		commandBuffers.clear();
 	}
 
-	void LveRenderer::recordCommandBuffer(int imageIndex) {
-		
-
-		
-
-		renderGameObjects(commandBuffers[imageIndex]);
-
-		vkCmdEndRenderPass(commandBuffers[imageIndex]);
-		
-	}
-
-	void LveRenderer::drawFrame() {
-		
-
-		recordCommandBuffer(imageIndex);
-		
-	}
-
 	VkCommandBuffer LveRenderer::beginFrame() {
 		assert(!isFrameStarted && "Can't call beginFrame while already in progress.");
 
@@ -123,6 +105,7 @@ namespace lve {
 
 		return commandBuffer;
 	}
+
 	void LveRenderer::endFrame() {
 		assert(isFrameStarted && "Can't call endFrame while frame is not in progress.");
 		auto commandBuffer = getCurrentCommandBuffer();
@@ -174,5 +157,11 @@ namespace lve {
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
-	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+		assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress.");
+		assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame.");
+
+		vkCmdEndRenderPass(commandBuffer);
+	}
 }
