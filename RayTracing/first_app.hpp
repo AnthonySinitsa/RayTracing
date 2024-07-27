@@ -5,6 +5,7 @@
 #include "lve_pipeline.hpp"
 #include "lve_swap_chain.hpp"
 #include "lve_window.hpp"
+// DELETE ME
 #include "lve_model.hpp"
 
 // std
