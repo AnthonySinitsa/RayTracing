@@ -47,6 +47,7 @@ namespace lve {
 		triangle.model = lveModel;
 		triangle.color = { .1f, .8f, .1f };
 		triangle.transform2d.translation.x = .2f;
+		triangle.transform2d.scale = { 2.f, .5f };
 
 		gameObjects.push_back(std::move(triangle));
 	}
