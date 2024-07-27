@@ -112,25 +112,14 @@ namespace lve {
 		renderGameObjects(commandBuffers[imageIndex]);
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
-		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to record command buffer!");
-		}
+		
 	}
 
 	void LveRenderer::drawFrame() {
 		
 
 		recordCommandBuffer(imageIndex);
-		result = lveSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || lveWindow.wasWindowResized()) {
-			lveWindow.resetWindowResizedFlag();
-			recreateSwapChain();
-			return;
-		}
-
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to present swap chain image!");
-		}
+		
 	}
 
 	VkCommandBuffer LveRenderer::beginFrame() {
@@ -160,7 +149,25 @@ namespace lve {
 
 		return commandBuffer;
 	}
-	void LveRenderer::endFrame();
+	void LveRenderer::endFrame() {
+		assert(isFrameStarted && "Can't call endFrame while frame is not in progress.");
+		auto commandBuffer = getCurrentCommandBuffer();
+
+		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to record command buffer!");
+		}
+
+		auto result = lveSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || lveWindow.wasWindowResized()) {
+			lveWindow.resetWindowResizedFlag();
+			recreateSwapChain();
+		} else if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to present swap chain image!");
+		}
+
+		isFrameStarted = false;
+	}
+
 	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 }
