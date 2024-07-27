@@ -26,9 +26,14 @@ namespace lve {
 
 		if (lveSwapChain == nullptr) {
 			lveSwapChain = std::make_unique<LveSwapChain>(lveDevice, extent);
-		}
-		else {
-			lveSwapChain = std::make_unique<LveSwapChain>(lveDevice, extent, std::move(lveSwapChain));
+		} else {
+			std::shared_ptr<LveSwapChain> oldSwapChain = std::move(lveSwapChain);
+			lveSwapChain = std::make_unique<LveSwapChain>(lveDevice, extent, oldSwapChain);
+
+			if (!oldSwapChain->compareSwapFormats(*lveSwapChain.get())) {
+				throw std::runtime_error("Swap chain image(or dept) format has changed.");
+			}
+
 			if (lveSwapChain->imageCount() != commandBuffers.size()) {
 				freeCommandBuffers();
 				createCommandBuffers();
