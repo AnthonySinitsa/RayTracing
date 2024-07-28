@@ -39,7 +39,7 @@ namespace lve {
                 std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
 
-            frameTime = glm::min(frameTime, MAX_FRAME_TIME);
+            //frameTime = glm::min(frameTime, MAX_FRAME_TIME);
 
             cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
@@ -61,11 +61,10 @@ namespace lve {
 		vkDeviceWaitIdle(lveDevice.device());
 	}
 
-    // temporary helper function, creates a 1x1x1 cube centered at offset
+    // temporary helper function, creates a 1x1x1 cube centered at offset with an index buffer
     std::unique_ptr<LveModel> createCubeModel(LveDevice& device, glm::vec3 offset) {
         LveModel::Builder modelBuilder{};
-        moveBuilder.vertices = {
-
+        modelBuilder.vertices = {
             // left face (white)
             {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
             {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
