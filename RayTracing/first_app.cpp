@@ -1,5 +1,5 @@
 #include "first_app.hpp"
-
+#include "lve_camera.hpp"
 #include "simple_render_system.hpp"
 
 // libs
@@ -21,6 +21,9 @@ namespace lve {
 
 	void FirstApp::run() {
 		SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
+        LveCamera camera{};
+        camera.setOrthographicProjection(-1, 1, -1, 1, -1, 1);
+
 		while (!lveWindow.shouldClose()) {
 			glfwPollEvents();
 
@@ -29,7 +32,7 @@ namespace lve {
 				// here is where we can implement more rendering passes
 
 				lveRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects);
+				simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
 				lveRenderer.endSwapChainRenderPass(commandBuffer);
 				lveRenderer.endFrame();
 			}
