@@ -47,7 +47,7 @@ namespace lve {
 
 		std::shared_ptr<LveModel> model{};
 		glm::vec3 color{};
-		Transform2dComponent transform2d{};
+		TransformComponent transform{};
 
 	private:
 		LveGameObject(id_t objId) :id{ objId } {}
