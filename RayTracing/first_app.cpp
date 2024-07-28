@@ -22,10 +22,12 @@ namespace lve {
 	void FirstApp::run() {
 		SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
         LveCamera camera{};
-        camera.setOrthographicProjection(-1, 1, -1, 1, -1, 1);
 
 		while (!lveWindow.shouldClose()) {
 			glfwPollEvents();
+
+            float aspect = lveRenderer.getAspectRatio();
+            camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
 
 			if (auto commandBuffer = lveRenderer.beginFrame()) {
 
