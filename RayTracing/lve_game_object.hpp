@@ -2,22 +2,29 @@
 
 #include "lve_model.hpp"
 
+// libs
+#include <glm/gtc/matrix_transform.hpp>
+
 // std
 #include <memory>
 
 namespace lve {
-	struct Transform2dComponent {
-		glm::vec2 translation{}; // (position offset)
-		glm::vec2 scale{ 1.f, 1.f };
-		float rotation;
+	struct TransformComponent {
+		glm::vec3 translation{}; // (position offset)
+		glm::vec3 scale{ 1.f, 1.f, 1.f };
+		glm::vec3 rotation{};
 
-		glm::mat2 mat2() {
-			const float s = glm::sin(rotation);
-			const float c = glm::cos(rotation);
-			glm::mat2 rotMatrix{ {c, s}, {-s, c} };
+		// Matrix corresponds to translate * Ry * Rx * Rz * scale transformation
+		// Rotation convention uses tait-bryan angles with axis order Y(1), X(2), Z(3)
+		glm::mat4 mat4() {
+			auto transform = glm::translate(glm::mat4{ 1.f }, translation);
 
-			glm::mat2 scaleMat{ {scale.x, .0f}, {.0f, scale.y} };
-			return  rotMatrix * scaleMat; 
+			transform = glm::rotate(transform, rotation.y, {0.f, 1.f, 0.f});
+			transform = glm::rotate(transform, rotation.x, {1.f, 0.f, 0.f});
+			transform = glm::rotate(transform, rotation.z, {0.f, 0.f, 1.f});
+
+			transform = glm::scale(transform, scale);
+			return transform;
 		}
 	};
 
