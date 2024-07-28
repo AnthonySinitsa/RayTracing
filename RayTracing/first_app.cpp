@@ -39,6 +39,8 @@ namespace lve {
                 std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
 
+            frameTime = glm::min(frameTime, MAX_FRAME_TIME);
+
             cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
@@ -61,7 +63,8 @@ namespace lve {
 
     // temporary helper function, creates a 1x1x1 cube centered at offset
     std::unique_ptr<LveModel> createCubeModel(LveDevice& device, glm::vec3 offset) {
-        std::vector<LveModel::Vertex> vertices{
+        LveModel::Builder modelBuilder{};
+        moveBuilder.vertices = {
 
             // left face (white)
             {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
@@ -112,10 +115,10 @@ namespace lve {
             {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
 
         };
-        for (auto& v : vertices) {
+        for (auto& v : modelBuilder.vertices) {
             v.position += offset;
         }
-        return std::make_unique<LveModel>(device, vertices);
+        return std::make_unique<LveModel>(device, modelBuilder);
     }
 
 	void FirstApp::loadGameObjects() {
