@@ -28,7 +28,7 @@ namespace lve {
 		LveDevice& device, const std::string& filepath) {
 		Builder builder{};
 		builder.loadModel(filepath);
-		std::count << "Vertex count: " << builder.vertices.size() << "\n";
+		std::cout << "Vertex count: " << builder.vertices.size() << "\n";
 		return std::make_unique<LveModel>(device, builder);
 	}
 
@@ -149,7 +149,7 @@ namespace lve {
 
 	void LveModel::Builder::loadModel(const std::string& filepath) {
 		tinyobj::attrib_t attrib;
-		std::vector<tinyobj::shate_t> shapes;
+		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
