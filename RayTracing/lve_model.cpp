@@ -1,13 +1,29 @@
 #include "lve_model.hpp"
 
+#include "lve_utils.hpp"
+
 // libs
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 // std
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <unordered_map>
+
+namespace std {
+	template<>
+	struct hash<lve::LveModel::Vertex> {
+		size_t operator()(lve::LveModel::Vertex const& vertex) const {
+			size_t seed = 0;
+			lve::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			return seed;
+		}
+	};
+}
 
 namespace lve {
 	LveModel::LveModel(LveDevice& device, const LveModel::Builder& builder) : lveDevice{ device } {
