@@ -11,7 +11,6 @@
 // std
 #include <cassert>
 #include <cstring>
-#include <iostream>
 #include <unordered_map>
 
 namespace std {
@@ -44,7 +43,7 @@ namespace lve {
 		LveDevice& device, const std::string& filepath) {
 		Builder builder{};
 		builder.loadModel(filepath);
-		std::cout << "Vertex count: " << builder.vertices.size() << "\n";
+		// std::cout << "Vertex count: " << builder.vertices.size() << "\n";
 		return std::make_unique<LveModel>(device, builder);
 	}
 
@@ -188,17 +187,11 @@ namespace lve {
 						attrib.vertices[3 * index.vertex_index + 2],
 					};
 
-					auto colorIndex = 3 * index.vertex_index + 2;
-					if (colorIndex < attrib.colors.size()) {
-						vertex.color = {
-							attrib.colors[colorIndex - 2],
-							attrib.colors[colorIndex - 1],
-							attrib.colors[colorIndex - 0],
-						};
-					}
-					else {
-						vertex.color = { 1.f, 1.f, 1.f }; // set default color
-					}
+					vertex.color = {
+						attrib.colors[3 * index.vertex_index + 0],
+						attrib.colors[3 * index.vertex_index + 1],
+						attrib.colors[3 * index.vertex_index + 2],
+					};
 				}
 
 				if (index.normal_index >= 0) {
