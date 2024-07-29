@@ -19,13 +19,6 @@ const float AMBIENT = 0.02;
 void main() {
 	gl_Position = push.transform * vec4(position, 1.0);
 
-	// temporary: this is only correct in certain conditions.
-	// only works properly if scale is uniform (sx == sy == sz)
-	// vec3 normalWorldSpace = normalize(mat3(push.modelMatrix) * normal);
-
-	// mat3 normalMatrix = transpose(inverse(mat3(push.modelMatrix)));
-	// vec3 normalWorldSpace = normalize(normalMatrix * normal);
-
 	vec3 normalWorldSpace = normalize(mat3(push.normalMatrix) * normal);
 
 	float lightIntensity = AMBIENT + max(dot(normalWorldSpace, DIRECTION_TO_LIGHT), 0);
