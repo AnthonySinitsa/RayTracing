@@ -60,7 +60,10 @@ namespace lve {
                 .build(globalDescriptorSets[i]);
         }
         
-		SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
+		SimpleRenderSystem simpleRenderSystem{ 
+            lveDevice, 
+            lveRenderer.getSwapChainRenderPass(), 
+            globalSetLayout->getDescriptorSetLayout()};
         LveCamera camera{};
 
         auto viewerObject = LveGameObject::createGameObject();
@@ -90,7 +93,8 @@ namespace lve {
                     frameIndex,
                     frameTime,
                     commandBuffer,
-                    camera
+                    camera,
+                    globalDescriptorSets[frameIndex]
                 };
 
                 // update
