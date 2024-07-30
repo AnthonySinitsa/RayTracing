@@ -32,6 +32,7 @@ namespace lve {
 		LveDevice lveDevice{lveWindow};
 		LveRenderer lveRenderer{ lveWindow, lveDevice };
 
+		// order of declaration matters
 		std::unique_ptr<LveDescriptorPool> globalPool{};
 		std::vector<LveGameObject> gameObjects;
 	};

@@ -24,7 +24,14 @@ namespace lve {
         glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
     };
 
-	FirstApp::FirstApp() { loadGameObjects(); }
+	FirstApp::FirstApp() { 
+        globalPool = 
+            LveDescriptorPool::Builder(lveDevice)
+            .setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .build();
+        loadGameObjects(); 
+    }
 
 	FirstApp::~FirstApp() {}
 
@@ -38,6 +45,19 @@ namespace lve {
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
             uboBuffers[i]->map();
+        }
+
+        auto globalSetLayout = 
+            LveDescriptorSetLayout::Builder(lveDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+
+        std::vector<VkDescriptorSet> globalDescriptorSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < globalDescriptorSets.size(); i++) {
+            auto bufferInfo = uboBuffers[i]->descriptorInfo();
+            LveDescriptorWriter(*globalSetLayout, *globalPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(globalDescriptorSets[i]);
         }
         
 		SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };

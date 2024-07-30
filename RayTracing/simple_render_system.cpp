@@ -18,7 +18,8 @@ namespace lve {
 		glm::mat4 normalMatrix{ 1.f };
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(LveDevice& device, VkRenderPass renderPass) : lveDevice{ device } {
+	SimpleRenderSystem::SimpleRenderSystem(LveDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+		: lveDevice{ device } {
 		createPipelineLayout();
 		createPipeline(renderPass);
 	}
