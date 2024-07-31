@@ -64,7 +64,7 @@ namespace lve {
 			pipelineConfig);
 	}
 
-	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
+	void SimpleRenderSystem::renderGameObjects(FrameInfo &frameInfo) {
 		lvePipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
