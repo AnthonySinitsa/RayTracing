@@ -22,6 +22,9 @@ namespace lve {
 		glm::mat3 normalMatrix();
 	};
 
+	struct PointLightComponent {
+		float lightIntensity = 1.0f;
+	};
 
 	class LveGameObject {
 	public:
@@ -33,6 +36,9 @@ namespace lve {
 			return LveGameObject{ currentId++ };
 		}
 
+		static LveGameObject makePointLight(
+			float intensity = 10.f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.f));
+
 		LveGameObject(const LveGameObject&) = delete;
 		LveGameObject& operator=(const LveGameObject&) = delete;
 		LveGameObject(LveGameObject&&) = default;
@@ -41,9 +47,12 @@ namespace lve {
 		// instead of const, might need to be id_t
 		id_t getId() { return id; }
 
-		std::shared_ptr<LveModel> model{};
 		glm::vec3 color{};
 		TransformComponent transform{};
+
+		// optional pointer components
+		std::shared_ptr<LveModel> model{};
+		std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
 		LveGameObject(id_t objId) :id{ objId } {}
