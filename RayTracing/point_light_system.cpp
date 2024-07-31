@@ -92,6 +92,24 @@ namespace lve {
 			nullptr
 		);
 
-		vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
+			if (obj.pointLight == nullptr) continue;
+
+			PointLightPushConstants push{};
+			push.position = glm::vec4(obj.transform.translation, 1.f);
+			push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+			push.radius = obj.transform.scale.x;
+
+			vkCmdPushConstants(
+				frameInfo.commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(PointLightPushConstants),
+				&push
+			);
+			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
+		}
 	}
 }
