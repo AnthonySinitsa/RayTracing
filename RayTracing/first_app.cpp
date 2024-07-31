@@ -4,6 +4,7 @@
 #include "lve_camera.hpp"
 #include "lve_buffer.hpp"
 #include "simple_render_system.hpp"
+#include "point_light_system.hpp"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -67,6 +68,10 @@ namespace lve {
             lveDevice, 
             lveRenderer.getSwapChainRenderPass(), 
             globalSetLayout->getDescriptorSetLayout()};
+        PointLightSystem pointLightSystem{
+            lveDevice,
+            lveRenderer.getSwapChainRenderPass(),
+            globalSetLayout->getDescriptorSetLayout() };
         LveCamera camera{};
 
         auto viewerObject = LveGameObject::createGameObject();
@@ -111,6 +116,7 @@ namespace lve {
                 // render
 				lveRenderer.beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderGameObjects(frameInfo);
+                pointLightSystem.render(frameInfo);
 				lveRenderer.endSwapChainRenderPass(commandBuffer);
 				lveRenderer.endFrame();
 			}
