@@ -1,9 +1,28 @@
+/**
+ * @file keyboard_movement_controller.cpp
+ * @brief Implementation of the KeyboardMovementController class, which handles keyboard inputs for moving a game object.
+ *
+ * This file contains the implementation of the KeyboardMovementController class, responsible for processing keyboard inputs
+ * to move a game object in the XZ plane and rotate it based on user input.
+ */
+
 #include "keyboard_movement_controller.hpp"
 
 // libs
 #include <limits>
 
 namespace lve {
+
+	/**
+	 * @brief Moves and rotates a game object based on keyboard input.
+	 *
+	 * This function processes the keyboard inputs to control the movement and rotation of a game object.
+	 * It allows the game object to move forward, backward, right, left, up, and down, as well as look in different directions.
+	 *
+	 * @param window The GLFW window capturing the user input.
+	 * @param dt The time delta between the current and the previous frame.
+	 * @param gameObject The game object to be moved and rotated.
+	 */
 	void KeyboardMovementController::moveInPlaneXZ(
 		GLFWwindow* window, float dt, LveGameObject& gameObject) {
 		

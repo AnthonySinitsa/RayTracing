@@ -9,6 +9,14 @@
 
 namespace lve {
 
+	/**
+	 * @brief Constructs a new LvePipeline object.
+	 *
+	 * @param device The Vulkan device to use.
+	 * @param vertFilePath The file path to the vertex shader.
+	 * @param fragFilePath The file path to the fragment shader.
+	 * @param configInfo The configuration information for the pipeline.
+	 */
 	LvePipeline::LvePipeline(
 		LveDevice& device,
 		const std::string& vertFilePath,
@@ -17,12 +25,21 @@ namespace lve {
 		createGraphicsPipeline(vertFilePath, fragFilePath, configInfo);
 	}
 
+	/**
+	 * @brief Destructor for LvePipeline.
+	 */
 	LvePipeline::~LvePipeline() {
 		vkDestroyShaderModule(lveDevice.device(), vertShaderModule, nullptr);
 		vkDestroyShaderModule(lveDevice.device(), fragShaderModule, nullptr);
 		vkDestroyPipeline(lveDevice.device(), graphicsPipeline, nullptr);
 	}
 
+	/**
+	 * @brief Reads the contents of a file.
+	 *
+	 * @param filepath The path to the file to read.
+	 * @return A vector containing the file's contents.
+	 */
 	std::vector<char> LvePipeline::readFile(const std::string& filepath) {
 		std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
 
@@ -40,6 +57,13 @@ namespace lve {
 		return buffer;
 	}
 
+	/**
+	 * @brief Creates the graphics pipeline.
+	 *
+	 * @param vertFilePath The file path to the vertex shader.
+	 * @param fragFilePath The file path to the fragment shader.
+	 * @param configInfo The configuration information for the pipeline.
+	 */
 	void LvePipeline::createGraphicsPipeline(
 		const std::string& vertFilePath,
 		const std::string& fragFilePath,
@@ -120,6 +144,12 @@ namespace lve {
 		std::cout << "Graphics Pipeline created successfully" << std::endl;
 	}
 
+	/**
+	 * @brief Creates a shader module from the provided code.
+	 *
+	 * @param code The shader code.
+	 * @param shaderModule The resulting shader module.
+	 */
 	void LvePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -131,10 +161,20 @@ namespace lve {
 		}
 	}
 
+	/**
+	 * @brief Binds the pipeline to the command buffer.
+	 *
+	 * @param commandBuffer The command buffer to bind to.
+	 */
 	void LvePipeline::bind(VkCommandBuffer commandBuffer) {
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 	}
 
+	/**
+	 * @brief Provides a default configuration for the pipeline.
+	 *
+	 * @param configInfo The configuration information to populate.
+	 */
 	void LvePipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) {
 		// Configure pipeline settings here
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

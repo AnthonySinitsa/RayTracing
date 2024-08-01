@@ -1,3 +1,12 @@
+/**
+ * @file lve_camera.cpp
+ * @brief Implementation of the LveCamera class for managing camera projections and view transformations.
+ *
+ * This file contains the implementation of the LveCamera class, which provides functions for setting
+ * orthographic and perspective projections, as well as different view transformations including
+ * direction-based, target-based, and rotation-based views.
+ */
+
 #include "lve_camera.hpp"
 
 // std
@@ -5,6 +14,19 @@
 #include <limits>
 
 namespace lve {
+
+	/**
+	 * @brief Sets the camera's orthographic projection matrix.
+	 *
+	 * This function configures the orthographic projection matrix with the given parameters.
+	 *
+	 * @param left The left plane of the orthographic projection.
+	 * @param right The right plane of the orthographic projection.
+	 * @param top The top plane of the orthographic projection.
+	 * @param bottom The bottom plane of the orthographic projection.
+	 * @param near The near plane of the orthographic projection.
+	 * @param far The far plane of the orthographic projection.
+	 */
 	void LveCamera::setOrthographicProjection(
 		float left, float right, float top, float bottom, float near, float far) {
 		projectionMatrix = glm::mat4{ 1.0f };
@@ -16,6 +38,16 @@ namespace lve {
 		projectionMatrix[3][2] = -near / (far - near);
 	}
 
+	/**
+	 * @brief Sets the camera's perspective projection matrix.
+	 *
+	 * This function configures the perspective projection matrix with the given parameters.
+	 *
+	 * @param fovy The field of view angle in the y-direction, in radians.
+	 * @param aspect The aspect ratio of the projection (width / height).
+	 * @param near The near plane of the perspective projection.
+	 * @param far The far plane of the perspective projection.
+	 */
 	void LveCamera::setPerspectiveProjection(float fovy, float aspect, float near, float far) {
 		assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
 		const float tanHalfFovy = tan(fovy / 2.f);
@@ -27,6 +59,15 @@ namespace lve {
 		projectionMatrix[3][2] = -(far * near) / (far - near);
 	}
 
+	/**
+	 * @brief Sets the camera's view matrix based on a direction.
+	 *
+	 * This function configures the view matrix using a position, direction, and up vector.
+	 *
+	 * @param position The position of the camera.
+	 * @param direction The direction the camera is looking at.
+	 * @param up The up vector for the camera.
+	 */
 	void LveCamera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
 		const glm::vec3 w{ glm::normalize(direction) };
 		const glm::vec3 u{ glm::normalize(glm::cross(w, up)) };
@@ -61,10 +102,27 @@ namespace lve {
 		inverseViewMatrix[3][2] = position.z;
 	}
 
+	/**
+	 * @brief Sets the camera's view matrix based on a target.
+	 *
+	 * This function configures the view matrix to look at a specific target from a position.
+	 *
+	 * @param position The position of the camera.
+	 * @param target The target the camera is looking at.
+	 * @param up The up vector for the camera.
+	 */
 	void LveCamera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up) {
 		setViewDirection(position, target - position, up);
 	}
 
+	/**
+	 * @brief Sets the camera's view matrix based on yaw, pitch, and roll.
+	 *
+	 * This function configures the view matrix using yaw, pitch, and roll rotations.
+	 *
+	 * @param position The position of the camera.
+	 * @param rotation The rotation of the camera (yaw, pitch, roll).
+	 */
 	void LveCamera::setViewYXZ(glm::vec3 position, glm::vec3 rotation) {
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
