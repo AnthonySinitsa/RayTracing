@@ -1,3 +1,14 @@
+/**
+ * @file first_app.cpp
+ * @brief Implementation of the FirstApp class, which initializes and runs the application.
+ *
+ * This file contains the implementation of the FirstApp class, responsible for setting up
+ * the Vulkan environment, loading game objects, and managing the main application loop.
+ *
+ * Includes Vulkan and GLM libraries, and custom classes for rendering, input control, camera,
+ * and buffer management.
+ */
+
 #include "first_app.hpp"
 
 #include "keyboard_movement_controller.hpp"
@@ -20,6 +31,9 @@
 
 namespace lve {
 
+    /**
+     * @brief Constructs the FirstApp object and initializes the descriptor pool.
+     */
 	FirstApp::FirstApp() { 
         globalPool = 
             LveDescriptorPool::Builder(lveDevice)
@@ -29,8 +43,17 @@ namespace lve {
         loadGameObjects(); 
     }
 
+    /**
+     * @brief Destructor for the FirstApp object.
+     */
 	FirstApp::~FirstApp() {}
 
+    /**
+     * @brief Runs the main application loop.
+     *
+     * This method sets up the necessary buffers, descriptor sets, and rendering systems.
+     * It handles updating game objects, managing camera movement, and rendering each frame.
+     */
 	void FirstApp::run() {
         std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
@@ -119,13 +142,19 @@ namespace lve {
 		vkDeviceWaitIdle(lveDevice.device());
 	}
 
+    /**
+     * @brief Loads the game objects to be rendered.
+     *
+     * This method creates game objects from model files and sets up their initial transforms.
+     * It also creates point light game objects and positions them in the scene.
+     */
 	void FirstApp::loadGameObjects() {
         std::shared_ptr<LveModel> lveModel = 
-            LveModel::createModelFromFile(lveDevice, "models/flat_vase.obj");
+            LveModel::createModelFromFile(lveDevice, "models/sphere.obj");
         auto flatVase = LveGameObject::createGameObject();
         flatVase.model = lveModel;
-        flatVase.transform.translation = { -.5f, .5f, 0.f };
-        flatVase.transform.scale = { 3.f, 1.5f, 3.f };
+        flatVase.transform.translation = { -.5f, -.1f, 0.f };
+        flatVase.transform.scale = { .3f, .3f, .3f };
         gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
         lveModel =

@@ -1,8 +1,15 @@
-#include "lve_model.hpp"
+/**
+ * @file lve_model.cpp
+ * @brief Implementation of the LveModel class for managing 3D models.
+ *
+ * This file contains the implementation of the LveModel class, including methods for creating
+ * and managing vertex and index buffers, loading models from files, and handling drawing commands.
+ */
 
+#include "lve_model.hpp"
 #include "lve_utils.hpp"
 
-// libs
+// external libraries
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -14,6 +21,11 @@
 #include <unordered_map>
 
 namespace std {
+	/**
+	 * @brief Hash function specialization for LveModel::Vertex.
+	 *
+	 * This specialization allows Vertex objects to be used as keys in unordered_map.
+	 */
 	template<>
 	struct hash<lve::LveModel::Vertex> {
 		size_t operator()(lve::LveModel::Vertex const& vertex) const {
@@ -25,12 +37,29 @@ namespace std {
 }
 
 namespace lve {
+	/**
+	 * @brief Constructs a new LveModel object.
+	 *
+	 * @param device The logical device used for creating Vulkan resources.
+	 * @param builder The builder containing the vertices and indices for the model.
+	 */
 	LveModel::LveModel(LveDevice& device, const LveModel::Builder& builder) : lveDevice{ device } {
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
 	}
+
+	/**
+	 * @brief Destructor for the LveModel class.
+	 */
 	LveModel::~LveModel() {}
 
+	/**
+	 * @brief Creates a model from an OBJ file.
+	 *
+	 * @param device The logical device used for creating Vulkan resources.
+	 * @param filepath The path to the OBJ file.
+	 * @return A unique pointer to the created LveModel.
+	 */
 	std::unique_ptr<LveModel> LveModel::createModelFromFile(
 		LveDevice& device, const std::string& filepath) {
 		Builder builder{};
@@ -39,6 +68,11 @@ namespace lve {
 		return std::make_unique<LveModel>(device, builder);
 	}
 
+	/**
+	 * @brief Creates vertex buffers for the model.
+	 *
+	 * @param vertices The vertices to be used for creating the buffers.
+	 */
 	void LveModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -67,6 +101,11 @@ namespace lve {
 		lveDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 	}
 
+	/**
+	 * @brief Creates index buffers for the model.
+	 *
+	 * @param indices The indices to be used for creating the buffers.
+	 */
 	void LveModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
 		indexCount = static_cast<uint32_t>(indices.size());
 		hasIndexBuffer = indexCount > 0;
@@ -100,6 +139,11 @@ namespace lve {
 		lveDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	}
 
+	/**
+	 * @brief Draws the model using the specified command buffer.
+	 *
+	 * @param commandBuffer The command buffer used for issuing the draw commands.
+	 */
 	void LveModel::draw(VkCommandBuffer commandBuffer) {
 		if (hasIndexBuffer) {
 			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
@@ -109,6 +153,11 @@ namespace lve {
 		}
 	}
 
+	/**
+	 * @brief Binds the model's vertex and index buffers to the command buffer.
+	 *
+	 * @param commandBuffer The command buffer used for binding the buffers.
+	 */
 	void LveModel::bind(VkCommandBuffer commandBuffer) {
 		VkBuffer buffers[] = { vertexBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
@@ -119,6 +168,11 @@ namespace lve {
 		}
 	}
 
+	/**
+	 * @brief Gets the binding descriptions for the vertex attributes.
+	 *
+	 * @return A vector of binding descriptions.
+	 */
 	std::vector<VkVertexInputBindingDescription> LveModel::Vertex::getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
@@ -127,6 +181,11 @@ namespace lve {
 		return bindingDescriptions;
 	}
 
+	/**
+	 * @brief Gets the attribute descriptions for the vertex attributes.
+	 *
+	 * @return A vector of attribute descriptions.
+	 */
 	std::vector<VkVertexInputAttributeDescription> LveModel::Vertex::getAttributeDescriptions() {
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
@@ -138,6 +197,11 @@ namespace lve {
 		return attributeDescriptions;
 	}
 
+	/**
+	 * @brief Loads a model from an OBJ file.
+	 *
+	 * @param filepath The path to the OBJ file.
+	 */
 	void LveModel::Builder::loadModel(const std::string& filepath) {
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;

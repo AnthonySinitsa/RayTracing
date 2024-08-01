@@ -7,14 +7,31 @@
 
 namespace lve {
 
+	/**
+	 * @brief Manages the Vulkan rendering process including swap chain handling and command buffer management.
+	 *
+	 * The `LveRenderer` class is responsible for setting up and managing Vulkan resources related to rendering,
+	 * such as the swap chain and command buffers. It handles the initialization, recreation, and cleanup of
+	 * these resources, as well as managing the lifecycle of rendering commands for each frame.
+	 */
 	LveRenderer::LveRenderer(LveWindow& window, LveDevice& device) : lveWindow{ window }, lveDevice{ device } {
 		recreateSwapChain();
 		createCommandBuffers();
 	}
 
+	/**
+	 * @brief Destructor for `LveRenderer`.
+	 *
+	 * Frees command buffers and performs necessary cleanup.
+	 */
 	LveRenderer::~LveRenderer() { freeCommandBuffers(); }
 
-	
+	/**
+	 * @brief Recreates the swap chain and associated resources.
+	 *
+	 * This method is called when the window size changes or if the swap chain is invalidated. It handles
+	 * the recreation of the swap chain and verifies if the swap chain image formats have changed.
+	 */
 	void LveRenderer::recreateSwapChain() {
 		auto extent = lveWindow.getExtent();
 		while (extent.width = 0 || extent.height == 0) {
@@ -34,10 +51,14 @@ namespace lve {
 				throw std::runtime_error("Swap chain image(or dept) format has changed.");
 			}
 		}
-
-		// COME BACK HERE
 	}
 
+	/**
+	 * @brief Allocates command buffers for rendering.
+	 *
+	 * This method allocates command buffers based on the number of frames in flight and associates them
+	 * with the command pool.
+	 */
 	void LveRenderer::createCommandBuffers() {
 		commandBuffers.resize(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
 
@@ -52,6 +73,11 @@ namespace lve {
 		}
 	}
 
+	/**
+	 * @brief Frees allocated command buffers.
+	 *
+	 * This method cleans up and deallocates command buffers that were previously allocated.
+	 */
 	void LveRenderer::freeCommandBuffers() {
 		vkFreeCommandBuffers(
 			lveDevice.device(),
@@ -61,6 +87,15 @@ namespace lve {
 		commandBuffers.clear();
 	}
 
+	/**
+	 * @brief Begins a new frame by acquiring an image from the swap chain.
+	 *
+	 * @return VkCommandBuffer The command buffer to record commands for the current frame.
+	 *
+	 * This method acquires the next available image from the swap chain and begins recording commands into
+	 * the associated command buffer. It handles the case where the swap chain is out of date and needs to
+	 * be recreated.
+	 */
 	VkCommandBuffer LveRenderer::beginFrame() {
 		assert(!isFrameStarted && "Can't call beginFrame while already in progress.");
 
@@ -89,6 +124,12 @@ namespace lve {
 		return commandBuffer;
 	}
 
+	/**
+	 * @brief Ends the current frame and submits the command buffer to the swap chain.
+	 *
+	 * This method ends the recording of the current command buffer and submits it to the swap chain for
+	 * presentation. It handles the case where the swap chain needs to be recreated or the window was resized.
+	 */
 	void LveRenderer::endFrame() {
 		assert(isFrameStarted && "Can't call endFrame while frame is not in progress.");
 		auto commandBuffer = getCurrentCommandBuffer();
@@ -109,6 +150,14 @@ namespace lve {
 		currentFrameIndex = (currentFrameIndex + 1) % LveSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
+	/**
+	 * @brief Begins a render pass for the current frame.
+	 *
+	 * @param commandBuffer The command buffer to begin the render pass on.
+	 *
+	 * This method sets up the render pass, including clearing values and viewport settings. It must be called
+	 * before recording any rendering commands into the command buffer.
+	 */
 	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
 		assert(isFrameStarted && "Can't call beginSwapChainRenderPass if frame is not in progress.");
 		assert(commandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame.");
@@ -142,6 +191,14 @@ namespace lve {
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
+	/**
+	 * @brief Ends the current render pass.
+	 *
+	 * @param commandBuffer The command buffer to end the render pass on.
+	 *
+	 * This method concludes the render pass and finalizes any pending rendering commands. It must be called
+	 * after all rendering commands have been recorded.
+	 */
 	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
 		assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress.");
 		assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame.");

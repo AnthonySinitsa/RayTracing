@@ -1,7 +1,22 @@
+/**
+ * @file lve_game_object.cpp
+ * @brief Implementation of game object functionalities including transformations and point lights.
+ *
+ * This file contains the implementation of the LveGameObject class and its associated components.
+ * It provides methods to create game objects, calculate transformation matrices, and manage point lights.
+ */
 #include "lve_game_object.hpp"
 
 namespace lve {
 
+	/**
+	 * @brief Calculates the transformation matrix for the component.
+	 *
+	 * This method computes the 4x4 transformation matrix that represents the translation,
+	 * rotation, and scale of the component in world space.
+	 *
+	 * @return A 4x4 transformation matrix.
+	 */
 	glm::mat4 TransformComponent::mat4() {
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -31,6 +46,14 @@ namespace lve {
 			{translation.x, translation.y, translation.z, 1.0f} };
 	}
 
+	/**
+	 * @brief Calculates the normal matrix for the component.
+	 *
+	 * This method computes the 3x3 normal matrix that represents the rotation and inverse scale
+	 * of the component. This matrix is used to transform normal vectors.
+	 *
+	 * @return A 3x3 normal matrix.
+	 */
 	glm::mat3 TransformComponent::normalMatrix() {
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -59,6 +82,17 @@ namespace lve {
 		};
 	}
 
+	/**
+	 * @brief Creates a point light game object.
+	 *
+	 * This method creates a new game object configured as a point light with the specified
+	 * intensity, radius, and color.
+	 *
+	 * @param intensity The intensity of the point light.
+	 * @param radius The radius of the point light.
+	 * @param color The color of the point light.
+	 * @return A new LveGameObject configured as a point light.
+	 */
 	LveGameObject LveGameObject::makePointLight(float intensity, float radius, glm::vec3 color) {
 		LveGameObject gameObj = LveGameObject::createGameObject();
 		gameObj.color = color;
